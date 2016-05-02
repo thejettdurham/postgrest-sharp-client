@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postgrest-sharp-client", "postgrest-sharp-client.csproj", "{0D4E80BE-6D7C-4FB4-BF5B-B8E7F2D92B68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postgrest-sharp-client", "projects\client\postgrest-sharp-client.csproj", "{0D4E80BE-6D7C-4FB4-BF5B-B8E7F2D92B68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
