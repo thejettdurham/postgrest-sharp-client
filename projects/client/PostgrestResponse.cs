@@ -13,12 +13,25 @@ namespace Postgrest.Client
             return JsonConvert.DeserializeObject<T>(Content);
         }
 
+        public string GetContentIfValid()
+        {
+            WasValid();
+
+            return Content;
+        }
+
+        /// <summary>
+        /// Throws an exception if any error was found in the response.
+        /// </summary>
         public void WasValid()
         {
             NoErrorsInRequest();
             StatusCodeIsValid();
         }
-
+        
+        /// <summary>
+        /// Throws a PostgrestRequestFailedException if any transport error is found in the response.
+        /// </summary>
         private void NoErrorsInRequest()
         {
             if (ErrorException != null) throw new PostgrestRequestFailedException(ErrorMessage ?? "Could not communicate with API server", ErrorException);
@@ -26,6 +39,9 @@ namespace Postgrest.Client
             if (ErrorMessage != null) throw new PostgrestRequestFailedException(ErrorMessage, ErrorException);
         }
 
+        /// <summary>
+        /// Throws a PostgrestErrorException if the HTTP status code of the response suggests an error. The error object from the API server is included with this exception.
+        /// </summary>
         private void StatusCodeIsValid()
         {
             if (!(StatusCode >= HttpStatusCode.OK && StatusCode < HttpStatusCode.Ambiguous))

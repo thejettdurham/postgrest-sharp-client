@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RestSharp;
 
 namespace Postgrest.Client
@@ -8,6 +9,7 @@ namespace Postgrest.Client
         private static HttpHeader _authHeader;
 
         public abstract string AuthToken { get; }
+        public override abstract Uri BaseUrl { get; }
         public abstract List<HttpHeader> ExtraHeaders { get; set; } 
 
         public HttpHeader AuthHeader
@@ -26,31 +28,45 @@ namespace Postgrest.Client
             }
         }
 
-        protected PostgrestClient(string location) : base(location)
+        protected PostgrestClient()
         {
             Authenticator = new PostgrestAuthenticator(AuthHeader);
         }
 
-        public T Execute<T>(PostgrestRequest postgrestRequest)
+        /// <summary>
+        /// Executes the request, checks validity, deserializes the response content as JSON into type T, and returns it.
+        /// </summary>
+        /// <typeparam name="T">A type deserializable by JSON.NET</typeparam>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public T ExecuteAndGetData<T>(PostgrestRequest request)
         {
-            PrepareGeneralRequest(postgrestRequest);
-            return ((PostgrestResponse)Execute(postgrestRequest)).GetDataIfValid<T>();
-        }
-
-        public void ExecuteNonQuery(PostgrestRequest postgrestRequest)
-        {
-            PrepareGeneralRequest(postgrestRequest);
-            ((PostgrestResponse)Execute(postgrestRequest)).WasValid();
+            return ExecuteRaw(request).GetDataIfValid<T>();
         }
 
         /// <summary>
-        /// Adds authorization and implementation-specific headers to incoming requests before execution
+        /// Executes the request, checks validity, and returns the response content as a string.
         /// </summary>
         /// <param name="request"></param>
-        private void PrepareGeneralRequest(PostgrestRequest request)
+        /// <returns></returns>
+        public string ExecuteAndGetContent(PostgrestRequest request)
         {
-            request.AddHeader(PostgrestHeaders.ContentType);
-            ExtraHeaders?.ForEach(header => request.AddHeader(header.Name, header.Value));
+            return ExecuteRaw(request).GetContentIfValid();
+        }
+
+        /// <summary>
+        /// Executes the request and checks validity. Any errors found in the response will throw an exception
+        /// </summary>
+        /// <param name="request"></param>
+        public void ExecuteAndCheckValidity(PostgrestRequest request)
+        {
+            ExecuteRaw(request).WasValid();
+        }
+
+        private PostgrestResponse ExecuteRaw(PostgrestRequest request)
+        {
+            ExtraHeaders?.ForEach(header => request.AddHeader(header));
+            return (PostgrestResponse)Execute(request);
         }
     }
 }
