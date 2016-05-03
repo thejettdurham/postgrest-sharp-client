@@ -21,5 +21,11 @@ namespace Postgrest.Client
             Name = "Prefer",
             Value = "plurality=singular"
         };
+
+        public static HttpHeader SuppressCount => new HttpHeader
+        {
+            Name = "Prefer",
+            Value = "count=none"
+        };
     }
 }

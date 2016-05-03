@@ -13,7 +13,9 @@ namespace postgrest_sharp_client_tests
             var myFoo =
                 new SimplePostgrestClient().ExecuteAndGetData<object>(PostgrestRequest.Read("devices")
                     .Singular()
-                    .Where("deviceid", PostgrestFilter.EqualTo("someuuid")));
+                    .Where("deviceid", PostgrestFilter.EqualTo("someuuid"))
+                    // Where is method on the base class, which doesn't let me add impl-specific methods...
+                    );
             //var r = PostgrestRequest.Read()
         }
     }

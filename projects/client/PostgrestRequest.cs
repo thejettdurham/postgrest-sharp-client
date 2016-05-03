@@ -87,11 +87,56 @@ namespace Postgrest.Client
             return this;
         }
 
-        // TODO: Support Embedding Foreign Elements
+        public PostgrestReadRequest NoCount()
+        {
+            AddHeader(PostgrestHeaders.SuppressCount);
+            return this;
+        }
+
+        // TODO: Support Embedding Foreign Entities
         public PostgrestReadRequest SelectColumns(IEnumerable<string> columns)
         {
             AddQueryParameter(ColumnFilterKeyword, string.Join(",", columns));
             return this;
+        }
+
+        // TODO: Support JSON column
+
+        // TODO: Support Multiple Order Clauses
+        public PostgrestReadRequest Order(string column, bool? ascending = null, bool? nullsFirst = null )
+        {
+            var orderExpression = column;
+            if (ascending != null)
+            {
+                if (ascending.Value)
+                {
+                    orderExpression += ".asc";
+                }
+                else
+                {
+                    orderExpression += ".desc";
+                }
+            }
+
+            if (nullsFirst != null)
+            {
+                if (nullsFirst.Value)
+                {
+                    orderExpression += ".nullsfirst";
+                }
+                else
+                {
+                    orderExpression += ".nullslast";
+                }
+            }
+
+            AddQueryParameter("order", orderExpression);
+            return this;
+        }
+
+        public PostgrestReadRequest Limit(int from, int? to = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }
