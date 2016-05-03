@@ -57,7 +57,7 @@ namespace Postgrest.Client
         }
 
         /// <summary>
-        /// Executes the request, checks validity, deserializes the response content as JSON into type T, and returns it.
+        /// Executes the request, checks response validity, deserializes the response content as JSON into type T, and returns it.
         /// </summary>
         /// <typeparam name="T">A type deserializable by JSON.NET</typeparam>
         /// <param name="request"></param>
@@ -68,7 +68,7 @@ namespace Postgrest.Client
         }
 
         /// <summary>
-        /// Executes the request, checks validity, and returns the response content as a string.
+        /// Executes the request, checks response validity, and returns the response content as a string.
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -78,12 +78,15 @@ namespace Postgrest.Client
         }
 
         /// <summary>
-        /// Executes the request and checks validity. Any errors found in the response will throw an exception
+        /// Executes the request, checks repsonse validity, and returns the response. Any errors found in the response will throw an exception
         /// </summary>
         /// <param name="request"></param>
-        public void ExecuteAndCheckValidity(PostgrestRequest request)
+        /// <returns></returns>
+        public PostgrestResponse ExecuteAndValidate(PostgrestRequest request)
         {
-            ExecuteRaw(request).WasValid();
+            var response = ExecuteRaw(request);
+            response.WasValid();
+            return response;
         }
 
         /// <summary>

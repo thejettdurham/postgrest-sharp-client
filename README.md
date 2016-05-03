@@ -18,9 +18,11 @@ Currently, PostgREST Sharp Client is built atop [RestSharp](https://github.com/r
 
 ## TL;DR
 
-- Extend the abstract class **PostgrestClient** and provide a getter implementation for *AuthToken*.
+- Extend the abstract class **PostgrestClient** and provide getter implementations for *AuthToken* and *BaseUri*
 - Extend **PostgrestModel** to implement your data models (Highly recommended to generate these with a tool from the JSON Schema)
-- Build your request with an instance of **PostgrestRequest** (constructed with one of the static builder methods).
+- Build your request with an instance of **PostgrestRequest**.
 - Execute your request on your client with one of the execute methods:
-  - Execute<T>(request) to get back the data automatically deserialized as T.
-  - ExecuteNonQuery(request) to perform a request when you expect no data returned from the API.
+  - ExecuteAndGetData<T>(request) to validate the response and get back the data automatically deserialized as T.
+  - ExecuteAndGetContent(request) to validate the response and get the response body as a string.
+  - ExecuteAndValidate(request) to validate the response and return it
+  - ExecuteRaw(request) return the response without sending it through the built-in validity checks.
