@@ -63,9 +63,15 @@ namespace Postgrest.Client
             ExecuteRaw(request).WasValid();
         }
 
-        private PostgrestResponse ExecuteRaw(PostgrestRequest request)
+        /// <summary>
+        /// Executes the request and returns the response without any further validity checking.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public PostgrestResponse ExecuteRaw(PostgrestRequest request)
         {
             ExtraHeaders?.ForEach(header => request.AddHeader(header));
+            request.PrepareRequest();
             return (PostgrestResponse)Execute(request);
         }
     }

@@ -11,23 +11,29 @@ namespace postgrest_sharp_client_tests
         [TestMethod]
         public void TestMethod1()
         {
-            // Fluent
-            var myFoo =
-                new SimplePostgrestClient().ExecuteAndGetData<object>(PostgrestRequest.Read("devices")
-                    .Singular()
-                    .Where("deviceid", PostgrestFilter.EqualTo("someuuid"))
-                    );
-
-            // NonFluent
             var client = new SimplePostgrestClient();
-            var request = new PostgrestRequestNonFluent("devices", PostgrestRequestType.Read)
+
+            var loginProcedure = new PostgrestRequest("login", PostgrestRequestType.Procedure)
             {
-                AsSingular = true,
-                RowFilters = new Dictionary<string, PostgrestFilter>
+                ProcedureArgs = new Dictionary<string, string>
                 {
-                    {"deviceid", PostgrestFilter.EqualTo("someuuid") }
+                    {"User", "jsmith"},
+                    {"Pass", "password"}
                 }
             };
+
+            var token = client.ExecuteAndGetData<object>(loginProcedure);
+
+            var readDevice = new PostgrestRequest("devices", PostgrestRequestType.Read)
+            {
+                AsSingular = true,
+                RowFilters = new List<PostgrestFilter>
+                {
+                    new PostgrestFilter("deviceid", PostgrestFilterOperation.EqualTo, "someuuid")
+                }
+            };
+
+            var device = client.ExecuteAndGetData<object>(readDevice);
 
         }
     }

@@ -12,11 +12,5 @@ namespace Postgrest.Client
         {
             NullValueHandling = NullValueHandling.Ignore
         });
-
-        public string PrimaryKeyName => GetType()
-            .GetProperties()
-            .Single(p => p.GetCustomAttributes(typeof (PostgrestPrimaryKeyAttribute), true).Single() != null).Name;
-
-
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Postgrest.Client
@@ -10,133 +11,91 @@ namespace Postgrest.Client
     public class PostgrestRequest : RestRequest
     {
         private const string StoredProcedurePrefix = "rpc/";
-        protected const string ColumnFilterKeyword = "select";
+        private const string ColumnFilterKeyword = "select";
+        
 
-        protected PostgrestRequest(string route, Method method) : base(route, method)
+        //public string Route { get; private set; }
+        public PostgrestRequestType RequestType { get; }
+        public bool AsCsv { get; set; } // Read, (Create, Update if ReturnNewData)
+        public bool AsSingular { get; set; } // Read
+        public bool SupressCount { get; set; } // Read
+        public bool ReturnNewData { get; set; } // Create, Update
+        public PostgrestModel Data { get; set; } // Create, Update, Delete
+        public object ProcedureArgs { get; set; }
+        public List<PostgrestFilter> RowFilters { get; set; }
+
+        // TODO: Better Support Foreign Entity Embedding
+        // TODO: Better Support For Type Coercion on Column Filter
+        public List<string> ColumnFilters { get; set; } // Read, Create, Update (if ReturnNewData)
+
+        // TODO: Support json_col
+       
+        public List<PostgrestOrdering> Orderings { get; set; } // Read, Create, Update (if ReturnNewData)
+        public Tuple<int, int?> LimitRange { get; set; } // Read
+
+        public PostgrestRequest(string route, PostgrestRequestType rType)
         {
-
+            Resource = route;
+            RequestType = rType;
         }
 
+        /// <summary>
+        /// A simple extension method to allow direct addition of an HttpHeader to an IRestRequest.
+        /// </summary>
+        /// <param name="header"></param>
+        /// <returns></returns>
         public IRestRequest AddHeader(HttpHeader header)
         {
             return AddHeader(header.Name, header.Value);
         }
 
-        #region Static Builder Methods
-        public static PostgrestReadRequest Read(string table)
+        /// <summary>
+        /// Used by a PostgrestClient to convert the internal state of the PostgrestRequest into headers and parameters
+        /// </summary>
+        protected internal void PrepareRequest()
         {
-            return new PostgrestReadRequest(table);
+            // Handle the oddball requests first
+            switch (RequestType)
+            {
+                case PostgrestRequestType.Schema:
+                    Method = Method.OPTIONS;
+                    return;
+
+                case PostgrestRequestType.Procedure:
+                    PrepareProcedureRequest();
+                    return;
+
+                default:
+                    RowFilters.ForEach(f =>
+                    {
+                        AddQueryParameter(f.ColumnName, f.FilterExpression);
+                    });
+                    break;
+            }
+
+            switch (RequestType)
+            {
+                case PostgrestRequestType.Read:
+                    break;
+            }
         }
 
-        public static PostgrestRequest Create<T>(string table, T newData) where T : PostgrestModel
+        private void PrepareProcedureRequest()
         {
-            var request = new PostgrestRequest(table, Method.POST);
-            request.AddBody(newData.MinimalJson);
-            return request;
-        }
-
-        public static PostgrestRequest Update<T>(string table, T updateData) where T: PostgrestModel
-        {
-            var request = new PostgrestRequest(table, Method.PATCH);
-            request.AddBody(updateData.MinimalJson);
-            // Add primary key filter
-            return request;
-        }
-
-        public static PostgrestRequest Delete<T>(string table, T deleteData) where T: PostgrestModel
-        {
-            var request = new PostgrestRequest(table, Method.DELETE);
-            // Add primary key filter
-            return request;
-        }
-
-        // TODO: More specific typing for procedure arguments?
-        public static PostgrestRequest Procedure(string procedureName, object args)
-        {
-            var request = new PostgrestRequest(StoredProcedurePrefix + procedureName, Method.POST);
-            request.AddJsonBody(args);
-            return request;
-        }
-
-        #endregion
-
-        public PostgrestRequest Where(string colName, PostgrestFilter filter)
-        {
-            AddQueryParameter(colName, filter.ToString());
-            return this;
+            Method = Method.POST;
+            Resource = Resource.Insert(0, StoredProcedurePrefix);
+            AddBody(JsonConvert.SerializeObject(ProcedureArgs));
         }
 
     }
 
-    public class PostgrestReadRequest : PostgrestRequest
+    public enum PostgrestRequestType
     {
-        protected internal PostgrestReadRequest(string route) : base(route, Method.GET)
-        {
-
-        }
-
-        public PostgrestReadRequest AsCsv()
-        {
-            AddHeader(PostgrestHeaders.AcceptCsv);
-            return this;
-        }
-
-        public PostgrestReadRequest Singular()
-        {
-            AddHeader(PostgrestHeaders.SingularResponse);
-            return this;
-        }
-
-        public PostgrestReadRequest NoCount()
-        {
-            AddHeader(PostgrestHeaders.SuppressCount);
-            return this;
-        }
-
-        // TODO: Support Embedding Foreign Entities
-        public PostgrestReadRequest SelectColumns(IEnumerable<string> columns)
-        {
-            AddQueryParameter(ColumnFilterKeyword, string.Join(",", columns));
-            return this;
-        }
-
-        // TODO: Support JSON column
-
-        // TODO: Support Multiple Order Clauses
-        public PostgrestReadRequest Order(string column, bool? ascending = null, bool? nullsFirst = null )
-        {
-            var orderExpression = column;
-            if (ascending != null)
-            {
-                if (ascending.Value)
-                {
-                    orderExpression += ".asc";
-                }
-                else
-                {
-                    orderExpression += ".desc";
-                }
-            }
-
-            if (nullsFirst != null)
-            {
-                if (nullsFirst.Value)
-                {
-                    orderExpression += ".nullsfirst";
-                }
-                else
-                {
-                    orderExpression += ".nullslast";
-                }
-            }
-
-            AddQueryParameter("order", orderExpression);
-            return this;
-        }
-
-        public PostgrestReadRequest Limit(int from, int? to = null)
-        {
-            throw new NotImplementedException();
-        }
+        Create,
+        Read,
+        Update,
+        Delete,
+        Schema,
+        Procedure
     }
 }

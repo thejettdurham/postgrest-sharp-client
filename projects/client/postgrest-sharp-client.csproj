@@ -55,6 +55,7 @@
     <Compile Include="PostgrestFilter.cs" />
     <Compile Include="PostgrestHeaders.cs" />
     <Compile Include="PostgrestModel.cs" />
+    <Compile Include="PostgrestOrdering.cs" />
     <Compile Include="PostgrestRequest.cs" />
     <Compile Include="PostgrestRequestFailedException.cs" />
     <Compile Include="PostgrestResponse.cs" />

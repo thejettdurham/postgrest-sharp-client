@@ -11,7 +11,6 @@ namespace Postgrest.Client
     {
         private readonly PostgrestFilterOperation _filterOperation;
         private readonly string _filterCondition;
-        private readonly string _columnName;
 
         private static readonly Dictionary<PostgrestFilterOperation, string> OperationsToExpressions = new Dictionary
             <PostgrestFilterOperation, string>
@@ -28,25 +27,18 @@ namespace Postgrest.Client
             {PostgrestFilterOperation.In, "in"}
         };
 
+        public string ColumnName { get; private set; }
+        public string FilterExpression => ((Negate) ? "not." : "") + OperationsToExpressions[_filterOperation] + "." + _filterCondition;
         public bool Negate { get; set; }
-
-        public HttpHeader Header => new HttpHeader
-        {
-            Name = _columnName,
-            Value = ToFilterExpression()
-        };
 
         public PostgrestFilter(string columnName, PostgrestFilterOperation filterOperation, string filterCondition)
         {
-            _columnName = columnName;
+            ColumnName = columnName;
             _filterOperation = filterOperation;
             _filterCondition = filterCondition;
         }
 
-        private string ToFilterExpression()
-        {
-            return ((Negate) ? "not." : "") + OperationsToExpressions[_filterOperation] + "." + _filterCondition;
-        }
+        
     }
 
     public enum PostgrestFilterOperation
