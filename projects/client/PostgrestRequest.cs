@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -12,26 +9,31 @@ namespace Postgrest.Client
     {
         private const string StoredProcedurePrefix = "rpc/";
         private const string ColumnFilterKeyword = "select";
+        private const string ColumnFilterSeparator = ",";
+        private const string RangeHeaderName = "Range";
+        private const string RangeHeaderValueSeparator = "-";
         
-
-        //public string Route { get; private set; }
+        /// <summary>
+        /// Defines the over-arching behavior of the request
+        /// </summary>
         public PostgrestRequestType RequestType { get; }
-        public bool AsCsv { get; set; } // Read, (Create, Update if ReturnNewData)
-        public bool AsSingular { get; set; } // Read
-        public bool SupressCount { get; set; } // Read
-        public bool ReturnNewData { get; set; } // Create, Update
-        public PostgrestModel Data { get; set; } // Create, Update, Delete
+        public bool ReadAsCsv { get; set; }
+        public bool WriteAsCsv { get; set; }
+        public bool AsSingular { get; set; }
+        public bool SupressCount { get; set; }
+        public bool ReturnNewData { get; set; }
+        public PostgrestModel Data { get; set; }
         public object ProcedureArgs { get; set; }
         public List<PostgrestFilter> RowFilters { get; set; }
 
         // TODO: Better Support Foreign Entity Embedding
         // TODO: Better Support For Type Coercion on Column Filter
-        public List<string> ColumnFilters { get; set; } // Read, Create, Update (if ReturnNewData)
+        public List<string> ColumnFilters { get; set; }
 
         // TODO: Support json_col
-       
-        public List<PostgrestOrdering> Orderings { get; set; } // Read, Create, Update (if ReturnNewData)
-        public Tuple<int, int?> LimitRange { get; set; } // Read
+
+        public List<PostgrestOrdering> Orderings { get; set; }
+        public Tuple<int, int?> LimitRange { get; set; }
 
         public PostgrestRequest(string route, PostgrestRequestType rType)
         {
@@ -54,7 +56,7 @@ namespace Postgrest.Client
         /// </summary>
         protected internal void PrepareRequest()
         {
-            // Handle the oddball requests first
+            // Handle the oddball requests and any potential runtime errors first
             switch (RequestType)
             {
                 case PostgrestRequestType.Schema:
@@ -62,31 +64,115 @@ namespace Postgrest.Client
                     return;
 
                 case PostgrestRequestType.Procedure:
-                    PrepareProcedureRequest();
-                    return;
-
-                default:
-                    RowFilters.ForEach(f =>
+                    Method = Method.POST;
+                    Resource = Resource.Insert(0, StoredProcedurePrefix);
+                    if (ProcedureArgs != null)
                     {
-                        AddQueryParameter(f.ColumnName, f.FilterExpression);
-                    });
+                        AddBody(JsonConvert.SerializeObject(ProcedureArgs));
+                    }
+                    return;
+                
+                case PostgrestRequestType.Create:
+                    ErrorIfNoData();
+                    break;
+
+                case PostgrestRequestType.Update:
+                    ErrorIfNoRowFilters();
+                    ErrorIfNoData();
+                    break;
+
+                case PostgrestRequestType.Delete:
+                    ErrorIfNoRowFilters();
                     break;
             }
 
+            if (RequestType != PostgrestRequestType.Create)
+            {
+                RowFilters.ForEach(f =>
+                {
+                    AddQueryParameter(f.ColumnName, f.FilterExpression);
+                });
+            }
+            
             switch (RequestType)
             {
+                case PostgrestRequestType.Create:
+                    Method = Method.POST;
+                    if (ReturnNewData) PrepareVolatileRequestToReturnData();
+                    string serialized;
+
+                    if (WriteAsCsv)
+                    {
+                        AddHeader(PostgrestHeaders.SendCsv);
+                        serialized = Data.Csv;
+                    }
+                    else
+                    {
+                        AddHeader(PostgrestHeaders.JsonContentType);
+                        serialized = Data.Json;
+                    }
+
+                    AddParameter("theBody", serialized, ParameterType.RequestBody);
+                    break;
+
                 case PostgrestRequestType.Read:
+                    Method = Method.GET;
+                    PrepareReadRequest();
+                    break;
+
+                case PostgrestRequestType.Update:
+                    Method = Method.PATCH;
+                    if (ReturnNewData) PrepareVolatileRequestToReturnData();
+                    AddParameter("theBody", Data.MinimalJson, ParameterType.RequestBody);
+                    break;
+
+                case PostgrestRequestType.Delete:
+                    Method = Method.DELETE;
                     break;
             }
         }
 
-        private void PrepareProcedureRequest()
+        private void PrepareReadRequest()
         {
-            Method = Method.POST;
-            Resource = Resource.Insert(0, StoredProcedurePrefix);
-            AddBody(JsonConvert.SerializeObject(ProcedureArgs));
+            if (ReadAsCsv) AddHeader(PostgrestHeaders.AcceptCsv);
+            if (AsSingular) AddHeader(PostgrestHeaders.SingularResponse);
+            if (SupressCount) AddHeader(PostgrestHeaders.SuppressCount);
+
+            if (ColumnFilters != null)
+            {
+                AddQueryParameter(ColumnFilterKeyword, string.Join(ColumnFilterSeparator, ColumnFilters));
+            }
+
+            if (Orderings != null)
+            {
+                var orderParam = PostgrestOrdering.BuildOrderParameter(Orderings);
+
+                AddQueryParameter(orderParam.Item1, orderParam.Item2);
+            }
+
+            if (LimitRange != null)
+            {
+                AddHeader(PostgrestHeaders.RangeUnit);
+                AddHeader(RangeHeaderName,
+                    LimitRange.Item1 + RangeHeaderValueSeparator + (LimitRange.Item2?.ToString() ?? ""));
+            }
         }
 
+        private void PrepareVolatileRequestToReturnData()
+        {
+            AddHeader(PostgrestHeaders.ReturnRepresentation);
+            PrepareReadRequest();
+        }
+
+        private void ErrorIfNoRowFilters()
+        {
+            if (RowFilters == null) throw new InvalidOperationException("Row Filters must be supplied for " + RequestType + " requests.");
+        }
+
+        private void ErrorIfNoData()
+        {
+            if (Data == null) throw new InvalidOperationException("Data must be supplied for " + RequestType + " requests.");
+        }
     }
 
     public enum PostgrestRequestType

@@ -4,7 +4,7 @@ namespace Postgrest.Client
 {
     class PostgrestHeaders
     {
-        public static HttpHeader ContentType => new HttpHeader
+        public static HttpHeader JsonContentType => new HttpHeader
         {
             Name = "Content-Type",
             Value = "application/json"
@@ -38,6 +38,12 @@ namespace Postgrest.Client
         {
             Name = "Prefer",
             Value = "count=none"
+        };
+
+        public static HttpHeader RangeUnit => new HttpHeader
+        {
+            Name = "Range-Unit",
+            Value = "items"
         };
     }
 }

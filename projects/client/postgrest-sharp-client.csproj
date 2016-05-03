@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PostgrestAttributes.cs" />
     <Compile Include="PostgrestAuthenticator.cs" />
     <Compile Include="PostgrestClient.cs" />
     <Compile Include="PostgrestError.cs" />
