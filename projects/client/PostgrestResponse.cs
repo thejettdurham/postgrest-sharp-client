@@ -6,6 +6,11 @@ namespace Postgrest.Client
 {
     public class PostgrestResponse : RestResponse
     {
+        /// <summary>
+        /// Peforms response validation, then attempts to deserialize the response body into the given type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T GetDataIfValid<T>()
         {
             WasValid();
@@ -13,6 +18,10 @@ namespace Postgrest.Client
             return JsonConvert.DeserializeObject<T>(Content);
         }
 
+        /// <summary>
+        /// Performs response validation, then returns the response body as a string.
+        /// </summary>
+        /// <returns></returns>
         public string GetContentIfValid()
         {
             WasValid();

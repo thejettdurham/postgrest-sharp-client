@@ -17,22 +17,64 @@ namespace Postgrest.Client
         /// Defines the over-arching behavior of the request
         /// </summary>
         public PostgrestRequestType RequestType { get; }
+
+        /// <summary>
+        /// Encode response data as CSV instead of JSON
+        /// </summary>
         public bool ReadAsCsv { get; set; }
+
+        /// <summary>
+        /// Send as CSV instead of JSON
+        /// </summary>
         public bool WriteAsCsv { get; set; }
+
+        /// <summary>
+        /// Return a single JSON object instead of an array.
+        /// </summary>
         public bool AsSingular { get; set; }
+
+        /// <summary>
+        /// Don't return the total row count in a response header
+        /// </summary>
         public bool SupressCount { get; set; }
+        
+        /// <summary>
+        /// For Create and Update requests: return the created/modified object(s) in the response
+        /// </summary>
         public bool ReturnNewData { get; set; }
+
+        /// <summary>
+        /// Data to create or update
+        /// </summary>
         public PostgrestModel Data { get; set; }
+
+        /// <summary>
+        /// JSON-serializable arguments for Procedure requests
+        /// </summary>
         public object ProcedureArgs { get; set; }
+
+        /// <summary>
+        /// Row filters to shape the response objects
+        /// </summary>
         public List<PostgrestFilter> RowFilters { get; set; }
 
         // TODO: Better Support Foreign Entity Embedding
         // TODO: Better Support For Type Coercion on Column Filter
+        /// <summary>
+        /// Column Filters to shape the response objects
+        /// </summary>
         public List<string> ColumnFilters { get; set; }
 
         // TODO: Support json_col
 
+        /// <summary>
+        /// Ordering expressions to shape the response objects
+        /// </summary>
         public List<PostgrestOrdering> Orderings { get; set; }
+
+        /// <summary>
+        /// A pair of integers to limit the number of returned objects. The lower bound is required, but the upper bound can be null.
+        /// </summary>
         public Tuple<int, int?> LimitRange { get; set; }
 
         public PostgrestRequest(string route, PostgrestRequestType rType)
@@ -99,20 +141,20 @@ namespace Postgrest.Client
                 case PostgrestRequestType.Create:
                     Method = Method.POST;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
-                    string serialized;
+                    string serializedData;
 
                     if (WriteAsCsv)
                     {
                         AddHeader(PostgrestHeaders.SendCsv);
-                        serialized = Data.Csv;
+                        serializedData = Data.Csv;
                     }
                     else
                     {
                         AddHeader(PostgrestHeaders.JsonContentType);
-                        serialized = Data.Json;
+                        serializedData = Data.Json;
                     }
 
-                    AddParameter("theBody", serialized, ParameterType.RequestBody);
+                    AddParameter("theBody", serializedData, ParameterType.RequestBody);
                     break;
 
                 case PostgrestRequestType.Read:

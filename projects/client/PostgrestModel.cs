@@ -2,6 +2,9 @@
 
 namespace Postgrest.Client
 {
+    /// <summary>
+    /// A class to build Postgrest Models upon. This base class provides behavior needed by the library to know how to handle the data when its being sent to the API server.
+    /// </summary>
     public abstract class PostgrestModel
     {
         /// <summary>

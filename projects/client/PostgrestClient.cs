@@ -4,18 +4,38 @@ using RestSharp;
 
 namespace Postgrest.Client
 {
+    /// <summary>
+    /// A thin abstract wrapper around RestSharp's RestClient that implements most boilerplate from a Postgrest client implementation
+    /// </summary>
     public abstract class PostgrestClient : RestClient
     {
         private static HttpHeader _authHeader;
 
-        public abstract string AuthToken { get; }
-        public override abstract Uri BaseUrl { get; }
-        public abstract List<HttpHeader> ExtraHeaders { get; set; } 
+        /// <summary>
+        /// Subclasses must implment this property to instruct the RestClient how to authenticate to the API.
+        /// If the Token is null, no Authentication will be supplied with any requests on the client.
+        /// By design, this getter will only be ran once in the lifetime of the client instance to build the AuthHeader singleton.
+        /// </summary>
+        protected abstract string AuthToken { get; }
 
-        public HttpHeader AuthHeader
+        /// <summary>
+        /// A Postgrest client implementation has exactly one BaseUrl. As such, subclasses must define it.
+        /// </summary>
+        public override abstract Uri BaseUrl { get; }
+
+        /// <summary>
+        /// An optional list of headers to attach to all requests sent through the client. Can be null to specify no extra headers.
+        /// </summary>
+        public List<HttpHeader> ExtraHeaders { get; set; } 
+
+        /// <summary>
+        /// Returns an instance of the Authentication header used by this class's authenticator.
+        /// </summary>
+        private HttpHeader AuthHeader
         {
             get
             {
+                if (AuthToken == null) return null;
                 if (_authHeader != null) return _authHeader;
 
                 _authHeader = new HttpHeader
@@ -30,7 +50,10 @@ namespace Postgrest.Client
 
         protected PostgrestClient()
         {
-            Authenticator = new PostgrestAuthenticator(AuthHeader);
+            if (AuthHeader != null)
+            {
+                Authenticator = new PostgrestAuthenticator(AuthHeader);
+            }
         }
 
         /// <summary>

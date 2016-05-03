@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Postgrest.Client;
+using Postgrest.Client.Sample;
+using RestSharp;
 
 namespace postgrest_sharp_client_tests
 {
@@ -12,7 +14,22 @@ namespace postgrest_sharp_client_tests
         [TestMethod]
         public void TestMethod1()
         {
-            var client = new SimplePostgrestClient();
+            var client = new SimplePostgrestClient
+            {
+                ExtraHeaders = new List<HttpHeader>
+                {
+                    new HttpHeader
+                    {
+                        Name = "header",
+                        Value = "something"
+                    },
+                    new HttpHeader
+                    {
+                        Name = "header2",
+                        Value = "Something Else"
+                    }
+                }
+            };
 
             var loginProcedure = new PostgrestRequest("login", PostgrestRequestType.Procedure)
             {
