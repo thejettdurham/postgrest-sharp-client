@@ -10,7 +10,8 @@ namespace Postgrest.Client
     {
         private readonly string _filterName;
         private readonly string _filterCondition;
-        private bool _negated;
+
+        public bool Negate { get; set; }
 
         private PostgrestFilter(string name)
         {
@@ -25,12 +26,12 @@ namespace Postgrest.Client
 
         public string ToFilterExpression()
         {
-            return ((_negated) ? "not." : "") + _filterName + "." + _filterCondition;
+            return ((Negate) ? "not." : "") + _filterName + "." + _filterCondition;
         }
 
-        public static PostgrestFilter EqualTo(object condition)
+        public static PostgrestFilter EqualTo(string condition)
         {
-            return new PostgrestFilter("eq", condition.ToString());
+            return new PostgrestFilter("eq", condition);
         } 
 
         public static PostgrestFilter GREATER_THAN = new PostgrestFilter("gt");
@@ -42,11 +43,5 @@ namespace Postgrest.Client
         public static PostgrestFilter FULL_TEXT = new PostgrestFilter("@@");
         public static PostgrestFilter IS = new PostgrestFilter("is");
         public static PostgrestFilter IN = new PostgrestFilter("in");
-
-        public PostgrestFilter Not()
-        {
-            _negated = true;
-            return this;
-        }
     }
 }

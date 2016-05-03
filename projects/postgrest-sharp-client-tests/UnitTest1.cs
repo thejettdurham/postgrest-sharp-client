@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postgrest.Client;
 
@@ -10,13 +11,24 @@ namespace postgrest_sharp_client_tests
         [TestMethod]
         public void TestMethod1()
         {
+            // Fluent
             var myFoo =
                 new SimplePostgrestClient().ExecuteAndGetData<object>(PostgrestRequest.Read("devices")
                     .Singular()
                     .Where("deviceid", PostgrestFilter.EqualTo("someuuid"))
-                    // Where is method on the base class, which doesn't let me add impl-specific methods...
                     );
-            //var r = PostgrestRequest.Read()
+
+            // NonFluent
+            var client = new SimplePostgrestClient();
+            var request = new PostgrestRequestNonFluent("devices", PostgrestRequestType.Read)
+            {
+                AsSingular = true,
+                RowFilters = new Dictionary<string, PostgrestFilter>
+                {
+                    {"deviceid", PostgrestFilter.EqualTo("someuuid") }
+                }
+            };
+
         }
     }
 }
