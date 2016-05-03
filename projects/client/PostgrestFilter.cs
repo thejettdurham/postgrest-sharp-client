@@ -3,45 +3,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace Postgrest.Client
 {
     public sealed class PostgrestFilter
     {
-        private readonly string _filterName;
+        private readonly PostgrestFilterOperation _filterOperation;
         private readonly string _filterCondition;
+        private readonly string _columnName;
+
+        private static readonly Dictionary<PostgrestFilterOperation, string> OperationsToExpressions = new Dictionary
+            <PostgrestFilterOperation, string>
+        {
+            {PostgrestFilterOperation.EqualTo, "eq"},
+            {PostgrestFilterOperation.GreaterThan, "gt"},
+            {PostgrestFilterOperation.LessThan, "lt"},
+            {PostgrestFilterOperation.GreaterThanOrEqualTo, "gte"},
+            {PostgrestFilterOperation.LessThanOrEqualTo, "lte"},
+            {PostgrestFilterOperation.Like, "like"},
+            {PostgrestFilterOperation.ILike, "ilike"},
+            {PostgrestFilterOperation.FullText, "@@"},
+            {PostgrestFilterOperation.Is, "is"},
+            {PostgrestFilterOperation.In, "in"}
+        };
 
         public bool Negate { get; set; }
 
-        private PostgrestFilter(string name)
+        public HttpHeader Header => new HttpHeader
         {
-            _filterName = name;
+            Name = _columnName,
+            Value = ToFilterExpression()
+        };
+
+        public PostgrestFilter(string columnName, PostgrestFilterOperation filterOperation, string filterCondition)
+        {
+            _columnName = columnName;
+            _filterOperation = filterOperation;
+            _filterCondition = filterCondition;
         }
 
-        private PostgrestFilter(string name, string condition)
+        private string ToFilterExpression()
         {
-            _filterName = name;
-            _filterCondition = condition;
+            return ((Negate) ? "not." : "") + OperationsToExpressions[_filterOperation] + "." + _filterCondition;
         }
+    }
 
-        public string ToFilterExpression()
-        {
-            return ((Negate) ? "not." : "") + _filterName + "." + _filterCondition;
-        }
-
-        public static PostgrestFilter EqualTo(string condition)
-        {
-            return new PostgrestFilter("eq", condition);
-        } 
-
-        public static PostgrestFilter GREATER_THAN = new PostgrestFilter("gt");
-        public static PostgrestFilter LESS_THAN = new PostgrestFilter("lt");
-        public static PostgrestFilter GREATER_THAN_OR_EQUAL = new PostgrestFilter("gte");
-        public static PostgrestFilter LESS_THAN_OR_EQUAL = new PostgrestFilter("lte");
-        public static PostgrestFilter LIKE = new PostgrestFilter("like");
-        public static PostgrestFilter ILIKE = new PostgrestFilter("ilike");
-        public static PostgrestFilter FULL_TEXT = new PostgrestFilter("@@");
-        public static PostgrestFilter IS = new PostgrestFilter("is");
-        public static PostgrestFilter IN = new PostgrestFilter("in");
+    public enum PostgrestFilterOperation
+    {
+        EqualTo,
+        GreaterThan,
+        LessThan,
+        GreaterThanOrEqualTo,
+        LessThanOrEqualTo,
+        Like,
+        ILike,
+        FullText,
+        Is,
+        In
     }
 }

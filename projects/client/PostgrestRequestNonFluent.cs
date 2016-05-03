@@ -18,11 +18,18 @@ namespace Postgrest.Client
         public bool AsCsv { get; set; }
         public bool AsSingular { get; set; }
         public bool SupressCount { get; set; }
+        public bool ReturnNewData { get; set; }
         public PostgrestModel Data { get; set; }
         public object ProcedureArgs { get; set; }
-        public Dictionary<string, PostgrestFilter> RowFilters { get; set; } 
+        public List<PostgrestFilter> RowFilters { get; set; }
+
+        // TODO: Better Support Foreign Entity Embedding
+        // TODO: Better Support For Type Coercion on Column Filter
         public List<string> ColumnFilters { get; set; }
-        public Tuple<string, bool?, bool?> Orderings { get; set; }
+
+        // TODO: Support json_col
+       
+        public List<PostgrestOrdering> Orderings { get; set; }
         public Tuple<int, int?> LimitRange { get; set; }
 
         public PostgrestRequestNonFluent(string route, PostgrestRequestType rType)
@@ -56,6 +63,19 @@ namespace Postgrest.Client
         Read,
         Update,
         Delete,
+        Schema,
         Procedure
+    }
+
+    public class PostgrestOrdering
+    {
+        public string ColumnToOrderBy { get; private set; }
+        public bool? IsAscending { get; set; }
+        public bool? NullsFirst { get; set; }
+
+        public PostgrestOrdering(string columnName)
+        {
+            ColumnToOrderBy = columnName;
+        }
     }
 }

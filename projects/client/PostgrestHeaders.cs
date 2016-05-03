@@ -16,6 +16,18 @@ namespace Postgrest.Client
             Value = "text/csv"
         };
 
+        public static HttpHeader SendCsv => new HttpHeader
+        {
+            Name = "Content-Type",
+            Value = "text/csv"
+        };
+
+        public static HttpHeader ReturnRepresentation => new HttpHeader
+        {
+            Name = "Prefer",
+            Value = "return=representation"
+        };
+
         public static HttpHeader SingularResponse => new HttpHeader
         {
             Name = "Prefer",
