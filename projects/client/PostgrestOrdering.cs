@@ -47,7 +47,8 @@ namespace Postgrest.Client
                                   ((NullsFirst.Value) ? NullsFirstKeyword : NullsLastKeyword);
                 }
 
-                return expression;
+                if (expression != null) return expression;
+                throw new NullReferenceException("OrderExpression cannot be null");
             }
         }
 
@@ -61,7 +62,7 @@ namespace Postgrest.Client
         /// </summary>
         /// <param name="orderings"></param>
         /// <returns></returns>
-        public static Tuple<string, string> BuildOrderParameter(List<PostgrestOrdering> orderings)
+        public static KeyValuePair<string, string> BuildOrderParameter(List<PostgrestOrdering> orderings)
         {
             var orderExpressions = new List<string>();
 
@@ -70,7 +71,7 @@ namespace Postgrest.Client
                 orderExpressions.Add(o.OrderExpression);
             });
 
-            return Tuple.Create(OrderKeyword, string.Join(ExternalExpressionSeparator, orderExpressions));
+            return new KeyValuePair<string, string>(OrderKeyword, string.Join(ExternalExpressionSeparator, orderExpressions));
         } 
     }
 }

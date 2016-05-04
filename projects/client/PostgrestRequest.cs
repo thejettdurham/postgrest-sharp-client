@@ -189,7 +189,7 @@ namespace Postgrest.Client
             {
                 var orderParam = PostgrestOrdering.BuildOrderParameter(Orderings);
 
-                AddQueryParameter(orderParam.Item1, orderParam.Item2);
+                AddQueryParameter(orderParam.Key, orderParam.Value);
             }
 
             if (LimitRange != null)
