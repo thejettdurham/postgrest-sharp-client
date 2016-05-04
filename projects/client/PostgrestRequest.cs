@@ -130,7 +130,7 @@ namespace Postgrest.Client
 
             if (RequestType != PostgrestRequestType.Create)
             {
-                RowFilters.ForEach(f =>
+                RowFilters?.ForEach(f =>
                 {
                     AddQueryParameter(f.ColumnName, f.FilterExpression);
                 });

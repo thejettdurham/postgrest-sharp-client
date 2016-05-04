@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Postgrest.Client
 {
@@ -33,7 +34,15 @@ namespace Postgrest.Client
         /// <summary>
         /// Generates the Filter expression for use in a request's Query Parameter
         /// </summary>
-        public string FilterExpression => ((Negate) ? FilterNegator + FilterExpressionSeparator : "") + OperationsToExpressions[_filterOperation] + FilterExpressionSeparator + _filterCondition;
+        public string FilterExpression
+        {
+            get
+            {
+                if (_filterCondition == null) throw new NullReferenceException("Filter Condition cannot be null");
+                return (Negate ? FilterNegator + FilterExpressionSeparator : "") + OperationsToExpressions[_filterOperation] +
+                FilterExpressionSeparator + _filterCondition;
+            }
+        }
 
         /// <summary>
         /// Inverts the logic of the filter

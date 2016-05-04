@@ -21,7 +21,7 @@ namespace Postgrest.Client
         /// <summary>
         /// A Postgrest client implementation has exactly one BaseUrl. As such, subclasses must define it.
         /// </summary>
-        public override abstract Uri BaseUrl { get; }
+        public abstract override Uri BaseUrl { get; }
 
         /// <summary>
         /// An optional list of headers to attach to all requests sent through the client. Can be null to specify no extra headers.
@@ -50,7 +50,10 @@ namespace Postgrest.Client
 
         protected PostgrestClient()
         {
-            if (AuthHeader != null)
+            // -- Checking BaseUrl here will force an exception to bubble up if the subclass fails to implement it or implements it with a null value.
+            // -- Much better than letting a non-well-formed client object exist.
+            // ReSharper disable once VirtualMemberCallInConstructor
+            if (BaseUrl != null && AuthHeader != null)
             {
                 Authenticator = new PostgrestAuthenticator(AuthHeader);
             }

@@ -6,7 +6,7 @@ namespace Postgrest.Client
     /// <summary>
     /// Implements RestSharp's IAuthenticator interface for authenticating requests in a PostgrestClient.
     /// </summary>
-    class PostgrestAuthenticator : IAuthenticator
+    public class PostgrestAuthenticator : IAuthenticator
     {
         private HttpHeader AuthHeader { get; }
 
@@ -17,7 +17,7 @@ namespace Postgrest.Client
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
-            ((PostgrestRequest)request).AddHeader(AuthHeader);
+            request.AddHeader(AuthHeader.Name, AuthHeader.Value);
         }
     }
 }

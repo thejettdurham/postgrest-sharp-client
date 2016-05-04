@@ -59,6 +59,21 @@ namespace Postgrest.Client.Tests
 
         #region Invalid Data tests
 
+        private static IEnumerable<TestCaseData> FiltersThrowingNullRefOnExpression()
+        {
+            yield return new TestCaseData(NullConditionFilter);
+        }
+
+        [Test, TestCaseSource(nameof(FiltersThrowingNullRefOnExpression))]
+        public void ExpressionsThrowNullReference(PostgrestFilter filter)
+        {
+            Assert.Throws<NullReferenceException>(() =>
+            {
+                // ReSharper disable once UnusedVariable
+                var throwsNull = filter.FilterExpression;
+            });
+        }
+
         #endregion
 
     }
