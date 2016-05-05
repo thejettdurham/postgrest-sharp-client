@@ -262,7 +262,7 @@ namespace Postgrest.Client
 
         private void ErrorIfNoRowFilters()
         {
-            if (RowFilters == null) throw new InvalidOperationException("Row Filters must be supplied for " + RequestType + " requests.");
+            if (RowFilters == null || RowFilters.Count == 0) throw new InvalidOperationException("Row Filters must be supplied for " + RequestType + " requests.");
         }
 
         private void ErrorIfNoData()

@@ -10,11 +10,13 @@ namespace Postgrest.Client
         /// <summary>
         /// Gets a full JSON representation of the object (nulls included)
         /// </summary>
+        [JsonIgnore]
         public string Json => JsonConvert.SerializeObject(this);
 
         /// <summary>
         /// Gets a JSON representation of the object with nulls stripped out.
         /// </summary>
+        [JsonIgnore]
         public string MinimalJson => JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
@@ -23,6 +25,7 @@ namespace Postgrest.Client
         /// <summary>
         /// Gets a CSV representation of the object
         /// </summary>
+        [JsonIgnore]
         public abstract string Csv { get; }
     }
 }

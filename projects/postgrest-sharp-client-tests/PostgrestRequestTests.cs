@@ -43,29 +43,41 @@ namespace Postgrest.Client.Tests.Unit
 
         private static IEnumerable<TestCaseData> ValidSchemaTestRequests()
         {
-            var testReqs = new TestPostgrestRequests();
+            yield return new TestCaseData(TestPostgrestRequests.BaseSchema);
+        }
 
-            yield return new TestCaseData(testReqs.BaseSchema);
+        private static IEnumerable<TestCaseData> ValidProcedureRequests()
+        {
+            yield return new TestCaseData(TestPostgrestRequests.BaseProcedure);
+            yield return new TestCaseData(TestPostgrestRequests.ProcedureWithArgs);
+        }
+
+        private static IEnumerable<TestCaseData> InvalidOperationRequests()
+        {
+            yield return new TestCaseData(TestPostgrestRequests.BaseCreate);
+            yield return new TestCaseData(TestPostgrestRequests.BaseUpdate);
+            yield return new TestCaseData(TestPostgrestRequests.UpdateWithEmptyRowFilters);
+            yield return new TestCaseData(TestPostgrestRequests.UpdateWithRowFilters);
+            yield return new TestCaseData(TestPostgrestRequests.BaseDelete);
+        }
+
+        private static IEnumerable<TestCaseData> ValidRequestsWithRowFilters()
+        {
+            yield return new TestCaseData(TestPostgrestRequests.UpdateWithRowFiltersAndData);
+            yield return new TestCaseData(TestPostgrestRequests.ReadWithRowFilters);
+            yield return new TestCaseData(TestPostgrestRequests.DeleteWithRowFilters);
         }
 
         [Test, TestCaseSource(nameof(ValidSchemaTestRequests))]
-        public void SchemaRequestPreparation(PostgrestRequest testRequest)
+        public void ValidSchemaRequestsAreOptions(PostgrestRequest testRequest)
         {
             var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
 
             Assert.That(request.Method, Is.EqualTo(Method.OPTIONS));
         }
 
-        private static IEnumerable<TestCaseData> ValidProcedureRequests()
-        {
-            var testReqs = new TestPostgrestRequests();
-
-            yield return new TestCaseData(testReqs.BaseProcedure);
-            yield return new TestCaseData(testReqs.ProcedureWithArgs);
-        }
-
         [Test, TestCaseSource(nameof(ValidProcedureRequests))]
-        public void ProcedureRequestsArePost(PostgrestRequest testRequest)
+        public void ValidProcedureRequestArePost(PostgrestRequest testRequest)
         {
             var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
 
@@ -73,7 +85,14 @@ namespace Postgrest.Client.Tests.Unit
         }
 
         [Test, TestCaseSource(nameof(ValidProcedureRequests))]
-        public void ProcedureRequestsWithArgsHaveBody(PostgrestRequest testRequest)
+        public void ValidProcedureRequestHaveRpcRoute(PostgrestRequest testRequest)
+        {
+            var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
+            Assert.That(request.Resource, Is.EqualTo("rpc/" + TestPostgrestRequests.TestRoute));
+        }
+
+        [Test, TestCaseSource(nameof(ValidProcedureRequests))]
+        public void ValidProcedureRequestHaveBodyIfArgs(PostgrestRequest testRequest)
         {
             var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
 
@@ -85,6 +104,40 @@ namespace Postgrest.Client.Tests.Unit
             {
                 Assert.True(true);
             }
+        }
+
+        [Test, TestCaseSource(nameof(InvalidOperationRequests))]
+        public void VolatileRequestsThrowingInvalidOperation(PostgrestRequest testRequest)
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                // ReSharper disable once UnusedVariable
+                var throws = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
+            });
+        }
+
+        [Test]
+        public void CreateRequestRowFiltersAreIgnored()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.CreateWithDataAndRowFilters).PrepareRequest();
+
+            var queryParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString 
+                && p.Name == TestPostgrestRequests.TestColumn 
+                && (string)p.Value == TestPostgrestRequests.TestRowFilterExpression);
+
+            Assert.That(0, Is.EqualTo(queryParams.Count));
+        }
+
+        [Test, TestCaseSource(nameof(ValidRequestsWithRowFilters))]
+        public void RowFilterAdditionWorksForNonCreateRequests(PostgrestRequest testRequest)
+        {
+            var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
+
+            var queryParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString
+                && p.Name == TestPostgrestRequests.TestColumn
+                && (string)p.Value == TestPostgrestRequests.TestRowFilterExpression);
+
+            Assert.That(1, Is.EqualTo(queryParams.Count));
         }
     }
 }
