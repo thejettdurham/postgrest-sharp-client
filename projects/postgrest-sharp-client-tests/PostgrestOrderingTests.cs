@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Postgrest.Client.Tests
+namespace Postgrest.Client.Tests.Unit
 {
     [TestFixture]
     public class PostgrestOrderingTests

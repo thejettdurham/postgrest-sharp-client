@@ -6,8 +6,8 @@
     <ProjectGuid>{2B15EFB3-9811-4109-AC3F-FC4F93B46D30}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Postgrest.Client.Tests</RootNamespace>
-    <AssemblyName>Postgrest.Client.Tests</AssemblyName>
+    <RootNamespace>Postgrest.Client.Tests.Unit</RootNamespace>
+    <AssemblyName>Postgrest.Client.Tests.Unit</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -75,9 +75,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="data\TestPostgrestRequests.cs" />
     <Compile Include="PostgrestClientTests.cs" />
     <Compile Include="PostgrestFilterTests.cs" />
     <Compile Include="PostgrestOrderingTests.cs" />
+    <Compile Include="PostgrestRequestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -90,10 +92,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="data\" />
-    <Folder Include="mocks\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

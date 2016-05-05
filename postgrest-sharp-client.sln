@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postgrest-sharp-client", "projects\client\postgrest-sharp-client.csproj", "{0D4E80BE-6D7C-4FB4-BF5B-B8E7F2D92B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postgrest-sharp-client-tests", "projects\postgrest-sharp-client-tests\postgrest-sharp-client-tests.csproj", "{2B15EFB3-9811-4109-AC3F-FC4F93B46D30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postgrest-sharp-client-unit-tests", "projects\postgrest-sharp-client-tests\postgrest-sharp-client-unit-tests.csproj", "{2B15EFB3-9811-4109-AC3F-FC4F93B46D30}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A6FE475B-6726-48FF-9FDB-7D2324E49F2C}"
 	ProjectSection(SolutionItems) = preProject

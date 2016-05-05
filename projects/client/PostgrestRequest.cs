@@ -12,6 +12,8 @@ namespace Postgrest.Client
         private const string ColumnFilterSeparator = ",";
         private const string RangeHeaderName = "Range";
         private const string RangeHeaderValueSeparator = "-";
+
+        protected internal const string PostgrestBodyName = "postgrestBody";
         
         /// <summary>
         /// Defines the over-arching behavior of the request
@@ -84,6 +86,58 @@ namespace Postgrest.Client
         }
 
         /// <summary>
+        /// Constructor to clone a request into a new object. Useful for composing complex requests from simpler ones.
+        /// </summary>
+        /// <param name="baseRequest"></param>
+        public PostgrestRequest(PostgrestRequest baseRequest) : this(baseRequest.Resource, baseRequest.RequestType)
+        {
+            ReadAsCsv = baseRequest.ReadAsCsv;
+            WriteAsCsv = baseRequest.WriteAsCsv;
+            AsSingular = baseRequest.AsSingular;
+            SupressCount = baseRequest.SupressCount;
+            ReturnNewData = baseRequest.ReturnNewData;
+            Data = baseRequest.Data;
+            ProcedureArgs = baseRequest.ProcedureArgs;
+            RowFilters = baseRequest.RowFilters;
+            ColumnFilters = baseRequest.ColumnFilters;
+            Orderings = baseRequest.Orderings;
+            LimitRange = baseRequest.LimitRange;
+        }
+
+        #region Generated Equality Members
+        protected bool Equals(PostgrestRequest other) => Resource == other.Resource && RequestType == other.RequestType && ReadAsCsv == other.ReadAsCsv && WriteAsCsv == other.WriteAsCsv && AsSingular == other.AsSingular && SupressCount == other.SupressCount && ReturnNewData == other.ReturnNewData && Equals(Data, other.Data) && Equals(ProcedureArgs, other.ProcedureArgs) && Equals(RowFilters, other.RowFilters) && Equals(ColumnFilters, other.ColumnFilters) && Equals(Orderings, other.Orderings) && Equals(LimitRange, other.LimitRange);
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PostgrestRequest) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (int) RequestType;
+                hashCode = (hashCode*397) ^ ReadAsCsv.GetHashCode();
+                hashCode = (hashCode*397) ^ WriteAsCsv.GetHashCode();
+                hashCode = (hashCode*397) ^ AsSingular.GetHashCode();
+                hashCode = (hashCode*397) ^ SupressCount.GetHashCode();
+                hashCode = (hashCode*397) ^ ReturnNewData.GetHashCode();
+                hashCode = (hashCode*397) ^ (Data?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (ProcedureArgs?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (RowFilters?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (ColumnFilters?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (Orderings?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (LimitRange?.GetHashCode() ?? 0);
+                return hashCode;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
         /// A simple extension method to allow direct addition of an HttpHeader to an IRestRequest.
         /// </summary>
         /// <param name="header"></param>
@@ -110,7 +164,7 @@ namespace Postgrest.Client
                     Resource = Resource.Insert(0, StoredProcedurePrefix);
                     if (ProcedureArgs != null)
                     {
-                        AddBody(JsonConvert.SerializeObject(ProcedureArgs));
+                        AddParameter(PostgrestBodyName, JsonConvert.SerializeObject(ProcedureArgs), ParameterType.RequestBody);
                     }
                     return;
                 
@@ -154,7 +208,7 @@ namespace Postgrest.Client
                         serializedData = Data.Json;
                     }
 
-                    AddParameter("theBody", serializedData, ParameterType.RequestBody);
+                    AddParameter(PostgrestBodyName, serializedData, ParameterType.RequestBody);
                     break;
 
                 case PostgrestRequestType.Read:
@@ -165,7 +219,7 @@ namespace Postgrest.Client
                 case PostgrestRequestType.Update:
                     Method = Method.PATCH;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
-                    AddParameter("theBody", Data.MinimalJson, ParameterType.RequestBody);
+                    AddParameter(PostgrestBodyName, Data.MinimalJson, ParameterType.RequestBody);
                     break;
 
                 case PostgrestRequestType.Delete:
