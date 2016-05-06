@@ -8,11 +8,15 @@
     <owners>$author$</owners>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/thejettdurham/postgrest-sharp-client</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/thejettdurham/postgrest-sharp-client/master/nuget-icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <releaseNotes>Initial package submission</releaseNotes>
     <copyright>Copyright 2016</copyright>
-    <tags>postgrest rest client</tags>
+    <tags>postgrest postgres postgresql rest client</tags>
+	<dependencies>
+		<dependency id="Newtonsoft.Json" version="8.0.3" />
+		<dependency id="RestSharp" version="105.2.3" />
+	</dependencies>
   </metadata>
 </package>
