@@ -60,6 +60,7 @@
     <Compile Include="PostgrestRequestTestAdapter.cs" />
     <Compile Include="PostgrestResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sample\SamplePostgrestModel.cs" />
     <Compile Include="Sample\SimplePostgrestClient.cs" />
   </ItemGroup>
   <ItemGroup>

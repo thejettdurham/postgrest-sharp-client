@@ -209,12 +209,12 @@ namespace Postgrest.Client
                     if (WriteAsCsv)
                     {
                         AddHeader(PostgrestHeaders.SendCsv);
-                        serializedData = Data.Csv;
+                        serializedData = Data.ToCsv();
                     }
                     else
                     {
                         AddHeader(PostgrestHeaders.JsonContentType);
-                        serializedData = Data.Json;
+                        serializedData = Data.ToJson();
                     }
 
                     AddParameter(PostgrestBodyName, serializedData, ParameterType.RequestBody);
@@ -223,7 +223,7 @@ namespace Postgrest.Client
                 case PostgrestRequestType.Update:
                     Method = Method.PATCH;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
-                    AddParameter(PostgrestBodyName, Data.MinimalJson, ParameterType.RequestBody);
+                    AddParameter(PostgrestBodyName, Data.ToMinimalJson(), ParameterType.RequestBody);
                     break;
             }
         }

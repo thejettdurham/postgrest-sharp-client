@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Postgrest.Client
 {
@@ -7,25 +8,46 @@ namespace Postgrest.Client
     /// </summary>
     public abstract class PostgrestModel
     {
+        protected virtual IContractResolver ModelContractResolver => new PostgrestContractResolver();
+
+        protected virtual JsonSerializerSettings JsonSerializationSettings => new JsonSerializerSettings
+        {
+            ContractResolver = ModelContractResolver
+        };
+
+        protected virtual JsonSerializerSettings MinimalJsonSerializationSettings => new JsonSerializerSettings
+        {
+            ContractResolver = ModelContractResolver,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
         /// <summary>
         /// Gets a full JSON representation of the object (nulls included)
         /// </summary>
-        [JsonIgnore]
-        public string Json => JsonConvert.SerializeObject(this);
+        public virtual string ToJson()
+        {
+           return JsonConvert.SerializeObject(this, JsonSerializationSettings);
+        }
 
         /// <summary>
         /// Gets a JSON representation of the object with nulls stripped out.
         /// </summary>
-        [JsonIgnore]
-        public string MinimalJson => JsonConvert.SerializeObject(this, new JsonSerializerSettings
+        public virtual string ToMinimalJson()
         {
-            NullValueHandling = NullValueHandling.Ignore
-        });
+            return JsonConvert.SerializeObject(this, MinimalJsonSerializationSettings);
+        }
 
         /// <summary>
         /// Gets a CSV representation of the object
         /// </summary>
-        [JsonIgnore]
-        public abstract string Csv { get; }
+        public abstract string ToCsv();
+    }
+
+    public class PostgrestContractResolver : DefaultContractResolver
+    {
+        protected override string ResolvePropertyName(string propertyName)
+        {
+            return propertyName.ToLower();
+        }
     }
 }
