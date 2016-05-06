@@ -192,6 +192,15 @@ namespace Postgrest.Client
             
             switch (RequestType)
             {
+                case PostgrestRequestType.Read:
+                    Method = Method.GET;
+                    PrepareReadRequest();
+                    break;
+
+                case PostgrestRequestType.Delete:
+                    Method = Method.DELETE;
+                    break;
+
                 case PostgrestRequestType.Create:
                     Method = Method.POST;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
@@ -209,21 +218,12 @@ namespace Postgrest.Client
                     }
 
                     AddParameter(PostgrestBodyName, serializedData, ParameterType.RequestBody);
-                    break;
-
-                case PostgrestRequestType.Read:
-                    Method = Method.GET;
-                    PrepareReadRequest();
-                    break;
+                    break;           
 
                 case PostgrestRequestType.Update:
                     Method = Method.PATCH;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
                     AddParameter(PostgrestBodyName, Data.MinimalJson, ParameterType.RequestBody);
-                    break;
-
-                case PostgrestRequestType.Delete:
-                    Method = Method.DELETE;
                     break;
             }
         }
@@ -234,12 +234,12 @@ namespace Postgrest.Client
             if (AsSingular) AddHeader(PostgrestHeaders.SingularResponse);
             if (SupressCount) AddHeader(PostgrestHeaders.SuppressCount);
 
-            if (ColumnFilters != null)
+            if (ColumnFilters != null && ColumnFilters.Count > 0)
             {
                 AddQueryParameter(ColumnFilterKeyword, string.Join(ColumnFilterSeparator, ColumnFilters));
             }
 
-            if (Orderings != null)
+            if (Orderings != null && Orderings.Count > 0)
             {
                 var orderParam = PostgrestOrdering.BuildOrderParameter(Orderings);
 

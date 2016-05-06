@@ -17,7 +17,7 @@ namespace Postgrest.Client
         /// Gets a JSON representation of the object with nulls stripped out.
         /// </summary>
         [JsonIgnore]
-        public string MinimalJson => JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
+        public string MinimalJson => JsonConvert.SerializeObject(this, new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
         });

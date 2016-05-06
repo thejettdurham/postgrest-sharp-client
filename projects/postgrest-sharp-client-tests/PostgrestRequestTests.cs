@@ -68,6 +68,12 @@ namespace Postgrest.Client.Tests.Unit
             yield return new TestCaseData(TestPostgrestRequests.DeleteWithRowFilters);
         }
 
+        private static IEnumerable<TestCaseData> ValidReadRequestsWithRange()
+        {
+            yield return new TestCaseData(TestPostgrestRequests.ReadWithBoundedRange, "0-10");
+            yield return new TestCaseData(TestPostgrestRequests.ReadWithUnboundedRange, "10-");
+        }
+
         [Test, TestCaseSource(nameof(ValidSchemaTestRequests))]
         public void ValidSchemaRequestsAreOptions(PostgrestRequest testRequest)
         {
@@ -121,11 +127,11 @@ namespace Postgrest.Client.Tests.Unit
         {
             var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.CreateWithDataAndRowFilters).PrepareRequest();
 
-            var queryParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString 
+            var rowFilterParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString 
                 && p.Name == TestPostgrestRequests.TestColumn 
                 && (string)p.Value == TestPostgrestRequests.TestRowFilterExpression);
 
-            Assert.That(0, Is.EqualTo(queryParams.Count));
+            Assert.That(0, Is.EqualTo(rowFilterParams.Count));
         }
 
         [Test, TestCaseSource(nameof(ValidRequestsWithRowFilters))]
@@ -133,11 +139,77 @@ namespace Postgrest.Client.Tests.Unit
         {
             var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
 
-            var queryParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString
+            var rowFilterParams = request.Parameters.FindAll(p => p.Type == ParameterType.QueryString
                 && p.Name == TestPostgrestRequests.TestColumn
                 && (string)p.Value == TestPostgrestRequests.TestRowFilterExpression);
 
-            Assert.That(1, Is.EqualTo(queryParams.Count));
+            Assert.That(TestPostgrestRequests.TestRowFilters.Count, Is.EqualTo(rowFilterParams.Count));
         }
+
+        [Test]
+        public void ColumnFilterQueryParamIsCorrect()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.ReadWithColumnFilters).PrepareRequest();
+
+            var selectQueryParam = request.Parameters.Single(p => p.Type == ParameterType.QueryString
+                && p.Name == "select");
+
+            Assert.That(selectQueryParam.Value.ToString(), Is.EqualTo("column1,column2,column3"));
+        }
+
+        [Test]
+        public void OrderingQueryParamIsCorrect()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.ReadWithOrdering).PrepareRequest();
+
+            var orderQueryParam = request.Parameters.Single(p => p.Type == ParameterType.QueryString
+                && p.Name == "order");
+
+            Assert.That(orderQueryParam.Value.ToString(), Is.EqualTo(TestPostgrestRequests.TestColumn));
+        }
+
+        [Test, TestCaseSource(nameof(ValidReadRequestsWithRange))]
+        public void LimitHeaderIsCorrect(PostgrestRequest testRequest, string expectedRangeExpression)
+        {
+            var request = new PostgrestRequestTestAdapter(testRequest).PrepareRequest();
+
+            var limitHeader = request.Parameters.Single(p => p.Type == ParameterType.HttpHeader
+                && p.Name == "Range");
+
+            Assert.That(limitHeader.Value.ToString(), Is.EqualTo(expectedRangeExpression));
+        }
+
+        [Test]
+        public void CreateRequestIsPost()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.CreateWithData).PrepareRequest();
+
+            Assert.That(request.Method, Is.EqualTo(Method.POST));
+        }
+
+        [Test]
+        public void DeleteRequestIsDelete()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.DeleteWithRowFilters).PrepareRequest();
+
+            Assert.That(request.Method, Is.EqualTo(Method.DELETE));
+        }
+
+        [Test]
+        public void ReadRequestIsGet()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.BaseRead).PrepareRequest();
+
+            Assert.That(request.Method, Is.EqualTo(Method.GET));
+        }
+        
+        [Test]
+        public void UpdateRequestIsPatch()
+        {
+            var request = new PostgrestRequestTestAdapter(TestPostgrestRequests.UpdateWithRowFiltersAndData).PrepareRequest();
+
+            Assert.That(request.Method, Is.EqualTo(Method.PATCH));
+        }
+       
     }
 }

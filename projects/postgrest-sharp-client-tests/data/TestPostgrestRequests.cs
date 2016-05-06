@@ -13,15 +13,6 @@ namespace Postgrest.Client.Tests.Unit.data
         internal const string TestColumn = "column";
         internal const string TestRowFilterCondition = "foo";
         internal const string TestRowFilterExpression = "eq." + TestRowFilterCondition;
-        internal const string TestModelCsvRepresentation = "csv";
-        internal const string TestModelDefaultName = "user";
-
-        class TestPostgrestModel : PostgrestModel
-        {
-            public override string Csv => TestModelCsvRepresentation;
-
-            public string Name { get; set; } = TestModelDefaultName;
-        }
 
         internal static Dictionary<string, string> TestProcedureArgs = new Dictionary<string, string>
         {
@@ -32,6 +23,21 @@ namespace Postgrest.Client.Tests.Unit.data
         {
             new PostgrestFilter(TestColumn, PostgrestFilterOperation.EqualTo, TestRowFilterCondition)
         };
+
+        internal static List<string> TestColumnFilters = new List<string>
+        {
+            "column1",
+            "column2",
+            "column3"
+        };
+
+        internal static List<PostgrestOrdering> TestOrderings = new List<PostgrestOrdering>()
+        {
+            new PostgrestOrdering(TestColumn)
+        };
+
+        internal static Tuple<int, int?> TestRangeBounded = Tuple.Create<int, int?>(0,10);
+        internal static Tuple<int, int?> TestRangeUnbounded = Tuple.Create<int, int?>(10, null);
 
         internal static PostgrestRequest BaseRead => new PostgrestRequest(TestRoute, PostgrestRequestType.Read);
         internal static PostgrestRequest BaseCreate => new PostgrestRequest(TestRoute, PostgrestRequestType.Create);
@@ -57,7 +63,7 @@ namespace Postgrest.Client.Tests.Unit.data
 
         internal static PostgrestRequest CreateWithData => new PostgrestRequest(BaseCreate)
         {
-            Data = new TestPostgrestModel()
+            Data = new TestPostgrestModels.User()
         };
 
         internal static PostgrestRequest CreateWithDataAndRowFilters => new PostgrestRequest(CreateWithData)
@@ -67,7 +73,7 @@ namespace Postgrest.Client.Tests.Unit.data
 
         internal static PostgrestRequest UpdateWithRowFiltersAndData => new PostgrestRequest(UpdateWithRowFilters)
         {
-            Data = new TestPostgrestModel()
+            Data = new TestPostgrestModels.User()
         };
 
         internal static PostgrestRequest ReadWithRowFilters => new PostgrestRequest(BaseRead)
@@ -78,6 +84,26 @@ namespace Postgrest.Client.Tests.Unit.data
         internal static PostgrestRequest DeleteWithRowFilters => new PostgrestRequest(BaseDelete)
         {
             RowFilters = TestRowFilters
+        };
+
+        internal static PostgrestRequest ReadWithColumnFilters => new PostgrestRequest(BaseRead)
+        {
+            ColumnFilters = TestColumnFilters
+        };
+
+        internal static PostgrestRequest ReadWithOrdering => new PostgrestRequest(BaseRead)
+        {
+            Orderings = TestOrderings
+        };
+
+        internal static PostgrestRequest ReadWithBoundedRange => new PostgrestRequest(BaseRead)
+        {
+            LimitRange = TestRangeBounded
+        };
+
+        internal static PostgrestRequest ReadWithUnboundedRange => new PostgrestRequest(BaseRead)
+        {
+            LimitRange = TestRangeUnbounded
         };
     }
 }

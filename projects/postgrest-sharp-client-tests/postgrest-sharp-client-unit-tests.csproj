@@ -75,9 +75,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="data\TestPostgrestModels.cs" />
     <Compile Include="data\TestPostgrestRequests.cs" />
     <Compile Include="PostgrestClientTests.cs" />
     <Compile Include="PostgrestFilterTests.cs" />
+    <Compile Include="PostgrestModelTests.cs" />
     <Compile Include="PostgrestOrderingTests.cs" />
     <Compile Include="PostgrestRequestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
