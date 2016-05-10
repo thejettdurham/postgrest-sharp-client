@@ -101,7 +101,7 @@ namespace Postgrest.Client
         {
             ExtraHeaders?.ForEach(header => request.AddHeader(header));
             request.PrepareRequest();
-            return (PostgrestResponse)Execute(request);
+            return new PostgrestResponse(Execute(request));
         }
     }
 }

@@ -4,8 +4,14 @@ using RestSharp;
 
 namespace Postgrest.Client
 {
-    public class PostgrestResponse : RestResponse
+    public class PostgrestResponse
     {
+        private readonly IRestResponse _baseResponse;
+
+        public PostgrestResponse(IRestResponse resp)
+        {
+            _baseResponse = resp;
+        }
         /// <summary>
         /// Peforms response validation, then attempts to deserialize the response body into the given type
         /// </summary>
@@ -15,7 +21,7 @@ namespace Postgrest.Client
         {
             WasValid();
 
-            return JsonConvert.DeserializeObject<T>(Content);
+            return JsonConvert.DeserializeObject<T>(_baseResponse.Content);
         }
 
         /// <summary>
@@ -26,7 +32,7 @@ namespace Postgrest.Client
         {
             WasValid();
 
-            return Content;
+            return _baseResponse.Content;
         }
 
         /// <summary>
@@ -43,9 +49,9 @@ namespace Postgrest.Client
         /// </summary>
         private void NoErrorsInRequest()
         {
-            if (ErrorException != null) throw new PostgrestRequestFailedException(ErrorMessage ?? "Could not communicate with API server", ErrorException);
-            if (ResponseStatus != ResponseStatus.Completed) throw new PostgrestRequestFailedException("Failed to complete request to API server", ErrorException);
-            if (ErrorMessage != null) throw new PostgrestRequestFailedException(ErrorMessage, ErrorException);
+            if (_baseResponse.ErrorException != null) throw new PostgrestRequestFailedException(_baseResponse.ErrorMessage ?? "Could not communicate with API server", _baseResponse.ErrorException);
+            if (_baseResponse.ResponseStatus != ResponseStatus.Completed) throw new PostgrestRequestFailedException("Failed to complete request to API server", _baseResponse.ErrorException);
+            if (_baseResponse.ErrorMessage != null) throw new PostgrestRequestFailedException(_baseResponse.ErrorMessage, _baseResponse.ErrorException);
         }
 
         /// <summary>
@@ -53,9 +59,9 @@ namespace Postgrest.Client
         /// </summary>
         private void StatusCodeIsValid()
         {
-            if (!(StatusCode >= HttpStatusCode.OK && StatusCode < HttpStatusCode.Ambiguous))
+            if (!(_baseResponse.StatusCode >= HttpStatusCode.OK && _baseResponse.StatusCode < HttpStatusCode.Ambiguous))
             {
-                throw new PostgrestErrorException(JsonConvert.DeserializeObject<PostgrestError>(Content));
+                throw new PostgrestErrorException(JsonConvert.DeserializeObject<PostgrestError>(_baseResponse.Content));
             }
         }
     }
