@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/thejettdurham/postgrest-sharp-client/master/nuget-icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Added Customizability to Json Serialization for Models</releaseNotes>
+    <releaseNotes>Fixed response handling issue</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>postgrest postgres postgresql rest client</tags>
 	<dependencies>
