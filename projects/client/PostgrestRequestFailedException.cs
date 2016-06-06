@@ -2,7 +2,7 @@
 
 namespace Postgrest.Client
 {
-    class PostgrestRequestFailedException : Exception
+    public class PostgrestRequestFailedException : Exception
     {
         public PostgrestRequestFailedException(string message, Exception requestException) : base(message, requestException)
         {

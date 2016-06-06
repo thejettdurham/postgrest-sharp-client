@@ -2,7 +2,7 @@
 
 namespace Postgrest.Client
 {
-    class PostgrestErrorException : Exception
+    public class PostgrestErrorException : Exception
     {
         public PostgrestError Error { get; private set; }
 

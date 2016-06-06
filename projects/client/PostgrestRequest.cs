@@ -12,8 +12,6 @@ namespace Postgrest.Client
         private const string ColumnFilterSeparator = ",";
         private const string RangeHeaderName = "Range";
         private const string RangeHeaderValueSeparator = "-";
-
-        protected internal const string PostgrestBodyName = "postgrestBody";
         
         /// <summary>
         /// Defines the over-arching behavior of the request
@@ -164,7 +162,7 @@ namespace Postgrest.Client
                     Resource = Resource.Insert(0, StoredProcedurePrefix);
                     if (ProcedureArgs != null)
                     {
-                        AddParameter(PostgrestBodyName, JsonConvert.SerializeObject(ProcedureArgs), ParameterType.RequestBody);
+                        AddParameter(PostgrestHeaders.JsonContentType.Value, JsonConvert.SerializeObject(ProcedureArgs), ParameterType.RequestBody);
                     }
                     return;
                 
@@ -210,20 +208,21 @@ namespace Postgrest.Client
                     {
                         AddHeader(PostgrestHeaders.SendCsv);
                         serializedData = Data.ToCsv();
+                        AddParameter(PostgrestHeaders.SendCsv.Value, serializedData, ParameterType.RequestBody);
                     }
                     else
                     {
-                        AddHeader(PostgrestHeaders.JsonContentType);
                         serializedData = Data.ToJson();
+                        AddParameter(PostgrestHeaders.JsonContentType.Value, serializedData, ParameterType.RequestBody);
                     }
 
-                    AddParameter(PostgrestBodyName, serializedData, ParameterType.RequestBody);
+                    
                     break;           
 
                 case PostgrestRequestType.Update:
                     Method = Method.PATCH;
                     if (ReturnNewData) PrepareVolatileRequestToReturnData();
-                    AddParameter(PostgrestBodyName, Data.ToMinimalJson(), ParameterType.RequestBody);
+                    AddParameter(PostgrestHeaders.JsonContentType.Value, Data.ToMinimalJson(), ParameterType.RequestBody);
                     break;
             }
         }
