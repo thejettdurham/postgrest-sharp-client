@@ -61,7 +61,10 @@ namespace Postgrest.Client
         {
             if (!(_baseResponse.StatusCode >= HttpStatusCode.OK && _baseResponse.StatusCode < HttpStatusCode.Ambiguous))
             {
-                throw new PostgrestErrorException(JsonConvert.DeserializeObject<PostgrestError>(_baseResponse.Content));
+                throw new PostgrestErrorException(JsonConvert.DeserializeObject<PostgrestError>(_baseResponse.Content))
+                {
+                    ApiResponse = _baseResponse
+                };
             }
         }
     }
