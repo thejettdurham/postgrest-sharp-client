@@ -1,5 +1,7 @@
-# IMPORTANT NOTE
-This library is in early development and is not yet functional.
+# PROJECT IS NOT MAINTAINED
+While I'm honored to be featured in the PostgREST Ecosystem, sadly I don't have the resources to continue work on this project. It started out as an experiment that worked decently for narrow usages, but I've found that the abstractions break down quickly after deviating from those usages. In fact, PostgREST is still actively developed, so there's a good chance that a lot of this code no longer works as intended.
+
+If you find this project useful and want to see it maintained, I encourage you to fork it. 
 
 # PostgREST Sharp Client
 An extensible implementation of a REST client tailored specific to REST endpoints served by PostgREST.
